@@ -74,44 +74,33 @@ void analizarPuertosSospechosos(std::vector<PortInfo>& puertos, NivelSensibilida
               << obtenerDescripcionSensibilidad(sensibilidad) << std::endl;
 
     for (auto& puerto : puertos) {
-        // Solo analizamos puertos ABIERTOS
-        if (puerto.estado != "Abierto") {
-            continue;
-        }
+        if (puerto.estado != "Abierto") continue;
 
-        // CRITERIO 1: Puertos conocidos de malware
+        // CRITERIO 1: Malware/backdoors
         if (esPuertoDeMalware(puerto.port)) {
             puerto.sospechoso = true;
-            puerto.razon = "Puerto conocido de malware/backdoor";
-            continue;
+            puerto.razon += "Puerto conocido de malware/backdoor; ";
         }
 
-        // CRITERIO 2: Puertos de administración expuestos
-        if (esPuertoAdministracion(puerto.port)) {
+        // CRITERIO 2: Administración expuesta (solo en MEDIO/ALTO)
+        if (sensibilidad >= MEDIO && esPuertoAdministracion(puerto.port)) {
             puerto.sospechoso = true;
-            puerto.razon = "Puerto de administración expuesto";
-            
-            // En sensibilidad BAJA, no marcamos admin como sospechoso
-            if (sensibilidad == BAJO) {
-                puerto.sospechoso = false;
-                puerto.razon = "";
-            }
-            continue;
+            puerto.razon += "Puerto de administración expuesto; ";
         }
 
-        // CRITERIO 3: Puertos altos inusuales (solo sensibilidad MEDIA/ALTA)
+        // CRITERIO 3: Puertos altos inusuales (solo MEDIO/ALTO)
         if (sensibilidad >= MEDIO && esPuertoAltoInusual(puerto.port)) {
             puerto.sospechoso = true;
-            puerto.razon = "Puerto alto inusual abierto";
-            continue;
+            puerto.razon += "Puerto alto inusual; ";
         }
+    }
 
-        // CRITERIO 4: Bloques de puertos consecutivos abiertos (solo ALTA sensibilidad)
-        if (sensibilidad == ALTO) {
-            // Buscar bloques de 3+ puertos consecutivos abiertos
-            if (hayBloquePuertosAbiertos(puertos, puerto.port, 3)) {
+    // CRITERIO 4: Bloques de puertos consecutivos (solo ALTO)
+    if (sensibilidad == ALTO && hayBloquePuertosAbiertos(puertos, 3)) {
+        for (auto& puerto : puertos) {
+            if (puerto.estado == "Abierto") {
                 puerto.sospechoso = true;
-                puerto.razon = "Bloque de puertos consecutivos abiertos (posible escaneo)";
+                puerto.razon += "Bloque de puertos consecutivos abiertos; ";
             }
         }
     }
