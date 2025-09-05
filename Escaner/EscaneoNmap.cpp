@@ -22,20 +22,19 @@ std::vector<PortInfo> EscaneoNmap::escanear(
     int fin = puertos.back();
     std::string rango = std::to_string(inicio) + "-" + std::to_string(fin);
 
-    // Ejecutar Nmap y guardar salida en archivo temporal
-    std::string archivo = "Registro.txt";
-    std::string comando = "nmap -p " + rango + " " + ip + " > " + archivo;
-    system(comando.c_str());
-
-    // Leer salida de Nmap
-    std::ifstream in(archivo);
-    if (!in.is_open()) {
-        std::cerr << "No se pudo abrir " << archivo << " para análisis\n";
+    // Ejecutar Nmap y leer salida directamente (sin archivo intermedio)
+    //Anteriormente se guardaba el resultado del escaneo en un txt, ahora se lee directamente de la memoria
+    std::string comando = "nmap -p " + rango + " " + ip;
+    FILE* pipe = popen(comando.c_str(), "r");
+    if (!pipe) {
+        std::cerr << "No se pudo ejecutar Nmap\n";
         return resultados;
     }
 
-    std::string linea;
-    while (std::getline(in, linea)) {
+    char buffer[256];
+    while (fgets(buffer, sizeof(buffer), pipe)) {
+        std::string linea(buffer);
+
         if (linea.find("/tcp") != std::string::npos) {
             std::stringstream ss(linea);
 
@@ -46,7 +45,8 @@ std::vector<PortInfo> EscaneoNmap::escanear(
             PortInfo info;
             info.port = puerto;
             info.proto = "TCP";
-            info.estado = (estado == "open") ? "Abierto" : "Cerrado";
+            info.estado = (estado == "open") ? "Abierto" :
+                        (estado == "filtered") ? "Filtrado" : "Cerrado";
             info.servicio = servicio;
             info.sospechoso = false;
             info.razon = "";
@@ -55,6 +55,6 @@ std::vector<PortInfo> EscaneoNmap::escanear(
         }
     }
 
-    in.close();
+    pclose(pipe);
     return resultados;
 }

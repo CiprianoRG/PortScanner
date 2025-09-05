@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "Escaneo.h"  // Aquí está PortInfo
+#include "Escaneo.h"   // 👈 aquí para que sepa qué es PortInfo
 
 // Contrato común para cualquier método de escaneo
 class EstrategiaEscaneo {

@@ -2,7 +2,7 @@
 #define ANALISIS_H
 
 #include <vector>
-#include "Escaneo.h"  // Incluimos para usar la estructura PortInfo
+#include "EstrategiaEscaneo.h"  // Incluimos para usar la estructura PortInfo
 
 // =====================
 // Niveles de sensibilidad para el análisis

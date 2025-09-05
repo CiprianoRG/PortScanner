@@ -93,17 +93,17 @@ void analizarPuertosSospechosos(std::vector<PortInfo>& puertos, NivelSensibilida
             puerto.sospechoso = true;
             puerto.razon += "Puerto alto inusual; ";
         }
-    }
-
-    // CRITERIO 4: Bloques de puertos consecutivos (solo ALTO)
-    if (sensibilidad == ALTO && hayBloquePuertosAbiertos(puertos, 3)) {
-        for (auto& puerto : puertos) {
-            if (puerto.estado == "Abierto") {
-                puerto.sospechoso = true;
-                puerto.razon += "Bloque de puertos consecutivos abiertos; ";
+        // CRITERIO 4: Bloques de puertos consecutivos (solo ALTO)
+        if (sensibilidad == ALTO && hayBloquePuertosAbiertos(puertos, puerto.port, 3)) {
+            for (auto& puerto : puertos) {
+                if (puerto.estado == "Abierto") {
+                    puerto.sospechoso = true;
+                    puerto.razon += "Bloque de puertos consecutivos abiertos; ";
+                }
             }
         }
     }
+
 }
 
 // =====================
