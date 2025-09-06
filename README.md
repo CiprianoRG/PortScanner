@@ -34,7 +34,7 @@ El programa está dividido en módulos que gestionan:
 
 ### Compilación con MSVC (Windows)
 ```powershell
-cl /std:c++17 /EHsc src\*.cpp /I include /Fe:escaner.exe
+cl /EHsc /std:c++17 /D_WIN32_WINNT=0x0601 /Iinclude src\*.cpp /FeEscaner.exe
 ```
 ## Entrada esperada
 
