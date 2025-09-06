@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <limits>   // para numeric_limits
 
 #include "EstrategiaEscaneo.h"
 #include "EscaneoSockets.h"
@@ -123,7 +124,10 @@ int main() {
     Registro reg;
     reg.guardarReporteTXT(analisis_detallado, "Registro.txt", ip, metodoEscaneo);
 
-    std::cout << "Reporte detallado  guardados en 'Registro.txt'\n";
+    std::cout << "\n Reporte detallado  guardados en 'Registro.txt'\n";
+    std::cout << "\nPresiona ENTER para salir...";
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // limpia buffer
+    std::cin.get(); // espera ENTER
 
     return 0;
 }
