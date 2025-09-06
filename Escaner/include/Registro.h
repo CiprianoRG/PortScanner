@@ -3,11 +3,25 @@
 
 #include <string>
 #include <vector>
-#include "Analisis.h"   // Para AnalisisPuerto y PortInfo
+#include "Analisis.h"  // Para AnalisisPuerto
 
-// Guarda los resultados del escaneo en un archivo de texto
-void guardarRegistro(const std::string& archivo,
-                     const std::string& ip,
-                     const std::vector<AnalisisPuerto>& analisis);
+// =====================
+// Módulo de registro en TXT
+// =====================
+class Registro {
+public:
+    // Guarda todos los resultados en un archivo TXT bien formateado
+    static void guardarReporteTXT(
+        const std::vector<AnalisisPuerto>& resultados,
+        const std::string& nombreArchivo,
+        const std::string& ip,
+        const std::string& metodoEscaneo
+    );
+    
+private:
+    // Helper functions
+    static std::string obtenerFechaHora();
+    static int contarPuertosAbiertos(const std::vector<AnalisisPuerto>& resultados);
+};
 
 #endif // REGISTRO_H

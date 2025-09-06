@@ -1,45 +1,55 @@
+==================================================
+               REPORTE DE ESCANEO
+==================================================
+Fecha y hora    : 2025-09-06 13:44:28
+IP escaneada    : 127.0.0.1
+Método escaneo  : Nmap (externo)
+Total puertos   : 5
+Puertos abiertos: 4
+Tasa de apertura: 80.0%
+==================================================
 
-==============================
-Resultados del escaneo - Sat Sep  6 11:33:26 2025
-IP escaneada: 127.0.0.1
+RESUMEN DE RIESGOS:
+--------------------------------------------------
+Críticos 🔴 : 0 puertos
+Altos    🟠 : 0 puertos
+Medios   🟡 : 2 puertos
+Bajos    🟢 : 1 puertos
+--------------------------------------------------
 
-Puerto 80 (): Abierto | Riesgo: BAJO 🟢 (40/100)
-Puerto 135 (): Abierto | Riesgo: MEDIO 🟡 (60/100)
-Puerto 137 (): Cerrado
-Puerto 443 (): Abierto | Riesgo: DESCONOCIDO ⚪ (30/100)
-Puerto 445 (): Abierto | Riesgo: MEDIO 🟡 (60/100)
-==============================
+DETALLE DE PUERTOS ABIERTOS:
+==================================================
+PUERTO: 80
+  Servicio  : http
+  Protocolo : TCP
+  Riesgo    : BAJO
+  Puntuación: 40/100
+--------------------------------------------------
+PUERTO: 135
+  Servicio  : msrpc
+  Protocolo : TCP
+  Riesgo    : MEDIO
+  Puntuación: 60/100
+--------------------------------------------------
+PUERTO: 443
+  Servicio  : https
+  Protocolo : TCP
+  Riesgo    : DESCONOCIDO
+  Puntuación: 30/100
+--------------------------------------------------
+PUERTO: 445
+  Servicio  : microsoft-ds
+  Protocolo : TCP
+  Riesgo    : MEDIO
+  Puntuación: 60/100
+--------------------------------------------------
 
-==============================
-Resultados del escaneo - Sat Sep  6 11:33:50 2025
-IP escaneada: 127.0.0.1
+PUERTOS CERRADOS/FILTRADOS:
+==================================================
+Puerto 137 : Filtrado
 
-Puerto 80 (): Abierto | Riesgo: BAJO 🟢 (40/100)
-Puerto 135 (): Abierto | Riesgo: MEDIO 🟡 (60/100)
-Puerto 137 (): Cerrado
-Puerto 443 (): Abierto | Riesgo: DESCONOCIDO ⚪ (30/100)
-Puerto 445 (): Abierto | Riesgo: MEDIO 🟡 (60/100)
-==============================
-
-==============================
-Resultados del escaneo - Sat Sep  6 11:40:35 2025
-IP escaneada: 127.0.0.1
-
-Puerto 80 (HTTP): Abierto | Riesgo: BAJO 🟢 (40/100)
-   - HTTP sin cifrado (debería ser HTTPS)
-Puerto 135 (Desconocido): Abierto | Riesgo: MEDIO 🟡 (60/100)
-Puerto 137 (Desconocido): Filtrado
-Puerto 443 (HTTPS): Abierto | Riesgo: DESCONOCIDO ⚪ (30/100)
-Puerto 445 (Desconocido): Abierto | Riesgo: MEDIO 🟡 (60/100)
-==============================
-
-==============================
-Resultados del escaneo - Sat Sep  6 11:40:52 2025
-IP escaneada: 127.0.0.1
-
-Puerto 80 (http): Abierto | Riesgo: BAJO 🟢 (40/100)
-Puerto 135 (msrpc): Abierto | Riesgo: MEDIO 🟡 (60/100)
-Puerto 137 (netbios-ns): Filtrado
-Puerto 443 (https): Abierto | Riesgo: DESCONOCIDO ⚪ (30/100)
-Puerto 445 (microsoft-ds): Abierto | Riesgo: MEDIO 🟡 (60/100)
-==============================
+==================================================
+RECOMENDACIONES DE SEGURIDAD:
+==================================================
+✅ ESTADO ACEPTABLE: Solo puertos de bajo riesgo abiertos
+==================================================
