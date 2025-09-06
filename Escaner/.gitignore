@@ -1,0 +1,22 @@
+# Archivos binarios y ejecutables
+*.exe
+*.obj
+*.pdb
+*.ilk
+*.log
+
+# Carpetas de VS Code
+.vscode/
+
+# Archivos temporales
+*.tmp
+*.bak
+*.swp
+
+# Archivos de compilación intermedia
+*.idb
+*.tlog
+*.ipch
+*.sdf
+*.opensdf
+*.VC.db
