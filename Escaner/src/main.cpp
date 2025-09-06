@@ -20,23 +20,27 @@ int main() {
     // 2. Elegir estrategia de escaneo
     int opcion;
     std::cout << "\nElige estrategia de escaneo:\n";
-    std::cout << "1) Sockets clásicos\n";
+    std::cout << "1) Sockets clasicos\n";
     std::cout << "2) ASIO (asíncrono)\n";
     std::cout << "3) Nmap (externo)\n";
-    std::cout << "Opción: ";
+    std::cout << "Opcion: ";
     std::cin >> opcion;
 
     std::unique_ptr<EstrategiaEscaneo> estrategia;
+    std::string metodoEscaneo;
 
     if (opcion == 1) {
         estrategia = std::make_unique<EscaneoSockets>();
+        metodoEscaneo = "Sockets clasicos";
     } else if (opcion == 2) {
         estrategia = std::make_unique<EscaneoAsio>();
+        metodoEscaneo = "ASIO (asíncrono)";
     } else if (opcion == 3) {
         verificarONstalarNmap(); // del módulo Utilidades
         estrategia = std::make_unique<EscaneoNmap>();
+        metodoEscaneo = "Nmap (externo)";
     } else {
-        std::cerr << "Opción inválida.\n";
+        std::cerr << "Opcion invalida.\n";
         return 1;
     }
 
@@ -81,11 +85,45 @@ int main() {
         }
     }
 
+    // 5. Mostrar resumen MUY simple en terminal
+    std::cout << "\n--- RESULTADOS ---\n";
+    std::cout << "IP: " << ip << " | Metodo: " << metodoEscaneo << "\n";
+    std::cout << "Puertos escaneados: " << resultados.size() << "\n";
+
+    int abiertos = 0;
+    int sospechosos = 0;
+    for (const auto& r : resultados) {
+        if (r.estado == "Abierto") abiertos++;
+        if (r.sospechoso) sospechosos++;
+    }
+
+    std::cout << "Puertos abiertos: " << abiertos << "\n";
+    std::cout << "Puertos sospechosos: " << sospechosos << "\n\n";
+
+    // Solo mostrar lista muy breve de puertos abiertos
+    if (abiertos > 0) {
+        std::cout << "Puertos abiertos encontrados:\n";
+        for (size_t i = 0; i < resultados.size(); ++i) {
+            const auto& r = resultados[i];
+            if (r.estado == "Abierto") {
+                std::cout << "- Puerto " << r.port << " (" << r.servicio << ")";
+                if (r.sospechoso) std::cout << " [SOSPECHOSO]";
+                std::cout << "\n";
+            }
+        }
+    } else {
+        std::cout << "No se encontraron puertos abiertos.\n";
+    }
+
+
 
     // 6. (Opcional) Guardar en archivo
-    guardarRegistro("Registro.txt", ip, analisis_detallado);
+    // ip es la IP que escaneaste
+    // metodoEscaneo es un string que describes tú, por ejemplo "ASIO" o "Sockets clásicos"
+    Registro reg;
+    reg.guardarReporteTXT(analisis_detallado, "Registro.txt", ip, metodoEscaneo);
 
-    std::cout << "\n[✔] Resultados guardados en 'Registro.txt'\n";
+    std::cout << "Reporte detallado  guardados en 'Registro.txt'\n";
 
     return 0;
 }

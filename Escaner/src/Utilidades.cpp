@@ -116,6 +116,6 @@ std::string servicioPorPuerto(int puerto) {
         case 443: return "HTTPS";
         case 3306: return "MySQL";
         case 3389: return "RDP";
-        default: return "";
+        default: return "Desconocido";
     }
 }
