@@ -12,10 +12,10 @@ El programa está dividido en módulos que gestionan:
 ---
 
 ## 👥 Integrantes del equipo
-- Nombre 1 — [correo o GitHub]  
-- Nombre 2 — [correo o GitHub]  
-- Nombre 3 — [opcional]  
-- Nombre 4 — [opcional]  
+- DIEGO AGUAYO FRIAS
+- VALERIA ABIGAIL NAVARRO CASAREZ
+- ASHLEY KARINA RIOS RODRIGUEZ
+- LUIS CIPRIANO RODRIGUEZ GONZALEZ
 
 ---
 
