@@ -1,119 +1,150 @@
 #include "Analisis.h"
 #include <iostream>
 #include <map>
+#include <algorithm>
 
 // =====================
-// Criterios de análisis - PUERTOS CONOCIDOS DE MALWARE/RIESGO
+// MAPA DE RIESGO DE PUERTOS ( conocimiento de vulnerabilidades)
 // =====================
-bool esPuertoDeMalware(int puerto) {
-    // Puertos comúnmente utilizados por malware o herramientas ofensivas
-    const int puertosMaliciosos[] = {
-        4444, 31337, 12345, 54321, 666, 1337,  // Backdoors clásicos
-        9999, 10000, 12346, 20000, 20001,      // Otros puertos sospechosos
-        27374, 5074, 1234, 1999, 6711,         // Más puertos de riesgo
-        8787, 1111, 2222, 3333, 5555, 7777, 8888  // Puertos consecutivos often usados
-    };
+std::map<int, int> mapaRiesgoPuertos = {
+    // 🔴 CRÍTICO: Puertos de malware/backdoors conocidos
+    {4444, 100}, {31337, 100}, {12345, 95}, {54321, 95}, {1337, 90},
     
-    for (int p : puertosMaliciosos) {
-        if (puerto == p) return true;
-    }
-    return false;
-}
-
-// =====================
-// Criterios de análisis - PUERTOS DE ADMINISTRACIÓN
-// =====================
-bool esPuertoAdministracion(int puerto) {
-    // Puertos de administración que deberían estar restringidos
-    const int puertosAdmin[] = {
-        22,   // SSH
-        23,   // Telnet (sin cifrado!)
-        3389, // RDP (Remote Desktop)
-        5900, // VNC
-        5432, // PostgreSQL
-        3306, // MySQL
-        1433, // MSSQL
-        1521  // Oracle
-    };
+    // 🔴 ALTO: Puertos de administración comúnmente atacados
+    {22, 85},    // SSH - brute force
+    {3389, 90},  // RDP - exploits comunes
+    {23, 80},    // Telnet - sin cifrado
+    {1433, 85},  // MSSQL - inyecciones
+    {1521, 85},  // Oracle - vulnerabilidades
+    {3306, 80},  // MySQL - ataques comunes
     
-    for (int p : puertosAdmin) {
-        if (puerto == p) return true;
+    // 🟡 MEDIO: Servicios con vulnerabilidades conocidas
+    {21, 70},    // FTP - sin cifrado
+    {25, 65},    // SMTP - spoofing
+    {53, 60},    // DNS - poisoning
+    {110, 60},   // POP3 - sin cifrado
+    {143, 60},   // IMAP - sin cifrado
+    
+    // 🟢 BAJO: Servicios generalmente seguros
+    {80, 40},    // HTTP - puede ser seguro con HTTPS
+    {443, 30},   // HTTPS - generalmente seguro
+    {993, 35},   // IMAPS - seguro
+    {995, 35},   // POP3S - seguro
+    
+    // 🔵 DINÁMICOS: Puertos altos (riesgo variable)
+    {10000, 50}, {20000, 50}, {30000, 45}, {40000, 45}, {50000, 40}
+};
+
+// =====================
+// Calcular puntuación de riesgo
+// =====================
+int calcularPuntuacionRiesgo(int puerto, const std::string& servicio) {
+    // 1. Buscar en mapa de riesgos conocidos
+    auto it = mapaRiesgoPuertos.find(puerto);
+    if (it != mapaRiesgoPuertos.end()) {
+        return it->second;
     }
-    return false;
-}
-
-// =====================
-// Criterios de análisis - PUERTOS ALTOS INUSUALES
-// =====================
-bool esPuertoAltoInusual(int puerto) {
-    // Puertos arriba de 10000 que no son comunes
-    return (puerto > 10000 && puerto < 49152); // Puertos dinámicos/privados
-}
-
-// =====================
-// Criterios de análisis - BLOQUES DE PUERTOS
-// =====================
-bool hayBloquePuertosAbiertos(const std::vector<PortInfo>& puertos, int inicio, int cantidad) {
-    int consecutivos = 0;
-    for (const auto& p : puertos) {
-        if (p.estado == "Abierto") {
-            consecutivos++;
-            if (consecutivos >= cantidad) return true;
-        } else {
-            consecutivos = 0;
-        }
+    
+    // 2. Calcular basado en rango del puerto
+    if (puerto >= 0 && puerto <= 1023) {
+        return 60; // Puertos de sistema - riesgo medio
+    } else if (puerto >= 1024 && puerto <= 49151) {
+        return 50; // Puertos registrados - riesgo medio-bajo
+    } else {
+        return 40; // Puertos dinámicos - riesgo bajo
     }
-    return false;
 }
 
 // =====================
-// FUNCIÓN PRINCIPAL DE ANÁLISIS
+// Determinar nivel de riesgo based on puntuación
 // =====================
-void analizarPuertosSospechosos(std::vector<PortInfo>& puertos, NivelSensibilidad sensibilidad) {
-    std::cout << "Analizando puertos con sensibilidad: " 
-              << obtenerDescripcionSensibilidad(sensibilidad) << std::endl;
+NivelRiesgo determinarNivelRiesgo(int puntuacion) {
+    if (puntuacion >= 90) return RIESGO_CRITICO;
+    if (puntuacion >= 75) return RIESGO_ALTO;
+    if (puntuacion >= 60) return RIESGO_MEDIO;
+    if (puntuacion >= 40) return RIESGO_BAJO;
+    return RIESGO_DESCONOCIDO;
+}
 
-    for (auto& puerto : puertos) {
-        if (puerto.estado != "Abierto") continue;
-
-        // CRITERIO 1: Malware/backdoors
-        if (esPuertoDeMalware(puerto.port)) {
-            puerto.sospechoso = true;
-            puerto.razon += "Puerto conocido de malware/backdoor; ";
-        }
-
-        // CRITERIO 2: Administración expuesta (solo en MEDIO/ALTO)
-        if (sensibilidad >= MEDIO && esPuertoAdministracion(puerto.port)) {
-            puerto.sospechoso = true;
-            puerto.razon += "Puerto de administración expuesto; ";
-        }
-
-        // CRITERIO 3: Puertos altos inusuales (solo MEDIO/ALTO)
-        if (sensibilidad >= MEDIO && esPuertoAltoInusual(puerto.port)) {
-            puerto.sospechoso = true;
-            puerto.razon += "Puerto alto inusual; ";
-        }
-        // CRITERIO 4: Bloques de puertos consecutivos (solo ALTO)
-        if (sensibilidad == ALTO && hayBloquePuertosAbiertos(puertos, puerto.port, 3)) {
-            for (auto& puerto : puertos) {
-                if (puerto.estado == "Abierto") {
-                    puerto.sospechoso = true;
-                    puerto.razon += "Bloque de puertos consecutivos abiertos; ";
-                }
-            }
-        }
+// =====================
+// Detectar vulnerabilidades específicas
+// =====================
+std::vector<std::string> detectarVulnerabilidades(int puerto, const std::string& servicio) {
+    std::vector<std::string> vulnerabilidades;
+    
+    // Detección basada en puerto y servicio
+    if (puerto == 23) vulnerabilidades.push_back("Telnet sin cifrado");
+    if (puerto == 21) vulnerabilidades.push_back("FTP sin cifrado");
+    if (puerto == 22) vulnerabilidades.push_back("SSH susceptible a brute force");
+    if (puerto == 3389) vulnerabilidades.push_back("RDP con posibles vulnerabilidades");
+    if (puerto == 1433 || puerto == 3306) {
+        vulnerabilidades.push_back("Posibles inyecciones SQL");
     }
-
+    if (puerto >= 4444 && puerto <= 4446) {
+        vulnerabilidades.push_back("Puerto común de Metasploit");
+    }
+    if (servicio.find("HTTP") != std::string::npos && puerto != 443) {
+        vulnerabilidades.push_back("HTTP sin cifrado (debería ser HTTPS)");
+    }
+    
+    return vulnerabilidades;
 }
 
 // =====================
-// Función auxiliar para descripción de sensibilidad
+// Función principal de análisis automático
 // =====================
-std::string obtenerDescripcionSensibilidad(NivelSensibilidad sensibilidad) {
-    switch (sensibilidad) {
-        case BAJO: return "BAJO (solo malware conocido)";
-        case MEDIO: return "MEDIO (malware + admin + puertos altos)";
-        case ALTO: return "ALTO (detección agresiva + bloques de puertos)";
-        default: return "DESCONOCIDO";
+std::vector<AnalisisPuerto> analizarPuertosDetallado(const std::vector<PortInfo>& puertos) {
+    std::vector<AnalisisPuerto> resultados;
+    
+    for (const auto& puerto : puertos) {
+        AnalisisPuerto analisis;
+        analisis.info = puerto;
+        
+        // Solo analizar puertos ABIERTOS
+        if (puerto.estado != "Abierto") {
+            analisis.nivel_riesgo = RIESGO_BAJO;
+            analisis.puntuacion_riesgo = 0;
+            resultados.push_back(analisis);
+            continue;
+        }
+        
+        // Calcular riesgo
+        analisis.puntuacion_riesgo = calcularPuntuacionRiesgo(puerto.port, puerto.servicio);
+        analisis.nivel_riesgo = determinarNivelRiesgo(analisis.puntuacion_riesgo);
+        analisis.vulnerabilidades = detectarVulnerabilidades(puerto.port, puerto.servicio);
+        
+        resultados.push_back(analisis);
+    }
+    
+    return resultados;
+}
+
+// =====================
+// Descripción de niveles de riesgo
+// =====================
+std::string obtenerDescripcionRiesgo(NivelRiesgo nivel) {
+    switch (nivel) {
+        case RIESGO_CRITICO: return "CRÍTICO";
+        case RIESGO_ALTO: return "ALTO"; 
+        case RIESGO_MEDIO: return "MEDIO";
+        case RIESGO_BAJO: return "BAJO";
+        case RIESGO_DESCONOCIDO: return "DESCONOCIDO";
+        default: return "NO EVALUADO";
+    }
+}
+
+// =====================
+// Función de compatibilidad (para no romper código existente)
+// =====================
+void analizarPuertosSospechosos(std::vector<PortInfo>& puertos, int sensibilidad) {
+    // Esta función se mantiene por compatibilidad, pero ahora usa el nuevo sistema
+    auto analisis_detallado = analizarPuertosDetallado(puertos);
+    
+    for (size_t i = 0; i < puertos.size(); ++i) {
+        // Marcar como sospechoso si tiene riesgo ALTO o CRÍTICO
+        if (analisis_detallado[i].nivel_riesgo <= RIESGO_ALTO) {
+            puertos[i].sospechoso = true;
+            puertos[i].razon = "Riesgo: " + obtenerDescripcionRiesgo(analisis_detallado[i].nivel_riesgo);
+        }
     }
 }
